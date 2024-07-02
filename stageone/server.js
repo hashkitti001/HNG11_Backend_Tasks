@@ -4,13 +4,13 @@ const express = require('express');
 const app = express();
 const PORT = process.env.PORT || 9999;
 const requestIp = require("request-ip")
-app.use(requestIp.mw())
+
 app.use(express.json());
 
 app.get('/api/hello', async (req, res) => {
   try {
     const { visitor_name } = req.query;
-    const clientIp = req.clientIp
+    const clientIp = requestIp.getClientIp(req)
    
     if (clientIp === '::1' || clientIp === '::ffff:127.0.0.1') {
         clientIp = '127.0.0.1';
