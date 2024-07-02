@@ -26,7 +26,7 @@ app.get('/api/hello', async (req, res) => {
     }
     
     const datafromIP = await axios.get(
-            `http://api.ipapi.com/api/${client_ip}?access_key=${process.env.IPAPI_KEY}`
+            `http://api.ipapi.com/api/${clientIP}?access_key=${process.env.IPAPI_KEY}`
     );
     
     const { city, country_name } = datafromIP?.data;
@@ -37,7 +37,7 @@ app.get('/api/hello', async (req, res) => {
     const { temp_c } = weatherData.data.current;
 
     const result = {
-      client_ip,
+      clientIp,
       location: city,
       greeting: `Hello ${visitor_name}! the temperature is ${temp_c} degree Celsius in ${city}`
     };
