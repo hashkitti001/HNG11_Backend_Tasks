@@ -26,7 +26,7 @@ app.get('/api/hello', async (req, res) => {
     }
     
     const datafromIP = await axios.get(
-            `http://api.ipapi.com/api/${clientIP}?access_key=${process.env.IPAPI_KEY}`
+            `http://api.ipapi.com/api/${clientIp}?access_key=${process.env.IPAPI_KEY}`
     );
     
     const { city, country_name } = datafromIP?.data;
