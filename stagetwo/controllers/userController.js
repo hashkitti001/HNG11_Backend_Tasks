@@ -8,9 +8,6 @@ const jwt = require("jsonwebtoken");
 const registerUser = async (req, res) => {
     const { firstName, lastName, email, password, phone } = req.body;
     try {
-        const salt = await bcrypt.genSalt(10);
-        const hashedPassword = await bcrypt.hash(password, salt);
-
         // Validate email format
         if (!validator.isEmail(email)) {
             return res.status(422).json({
@@ -20,6 +17,9 @@ const registerUser = async (req, res) => {
                 }]
             });
         }
+
+        const salt = await bcrypt.genSalt(10);
+        const hashedPassword = await bcrypt.hash(password, salt);
 
         const newUser = await User.create({
             userId: String(uuid.v4()),
@@ -44,17 +44,8 @@ const registerUser = async (req, res) => {
             }
         });
     } catch (e) {
-        if (e.errors) {
-            const errors = e.errors.map(err => ({
-                status: "Bad request",
-                message: err.message,
-                statusCode: "400"
-            }));
-            res.status(400).json({ errors });
-        } else {
-            console.error("Error registering user", e);
-            res.status(500).json({ message: "Internal server error" });
-        }
+        console.error("Error registering user", e);
+        res.status(500).json({ message: "Internal server error" });
     }
 };
 
@@ -64,19 +55,32 @@ const loginUser = async (req, res) => {
 
         // Validate email format
         if (!validator.isEmail(email)) {
-            throw new Error("Invalid email format");
+            return res.status(422).json({
+                errors: [{
+                    field: "email",
+                    message: "Invalid email format"
+                }]
+            });
         }
 
         const user = await User.findOne({ where: { email } });
 
         if (!user) {
-            throw new Error("A user with this email doesn't exist here");
+            return res.status(401).json({
+                status: "Bad request",
+                message: "A user with this email doesn't exist here",
+                statusCode: 401
+            });
         }
 
         const validPassword = await bcrypt.compare(password, user.password);
 
         if (!validPassword) {
-            throw new Error("Incorrect password. Try again");
+            return res.status(401).json({
+                status: "Bad request",
+                message: "Incorrect password. Try again",
+                statusCode: 401
+            });
         }
 
         const accessToken = jwt.sign(
@@ -100,41 +104,37 @@ const loginUser = async (req, res) => {
             }
         });
     } catch (e) {
-        if (e.errors) {
-            const errors = e.errors.map(err => ({
-                status: "Bad request",
-                message: err.message,
-                statusCode: 401
-            }));
-            res.status(401).json({ errors });
-        } else {
-            console.error("Error logging in user", e);
-            res.status(500).json({ message: "Authentication failed" });
-        }
+        console.error("Error logging in user", e);
+        res.status(500).json({ message: "Authentication failed" });
     }
 };
 
 const getUserById = async (req, res) => {
-    const { id } = req.params
-    const user = User.findByPk({ id })
-    if (!user) {
-        res.status(404).json({
-            "status": "User not found"
-        })
-    }
-    const { userId, firstName, lastName, email, phone } = user
-    return res.status(200).json({
-        "status": "User exists",
-        "message": "User profile found",
-        "data": {
-            userId,
-            firstName,
-            lastName,
-            email,
-            phone
+    const { id } = req.params;
+    try {
+        const user = await User.findByPk(id);
+        if (!user) {
+            return res.status(404).json({
+                status: "User not found"
+            });
         }
-    })
-}
+        const { userId, firstName, lastName, email, phone } = user;
+        return res.status(200).json({
+            status: "User exists",
+            message: "User profile found",
+            data: {
+                userId,
+                firstName,
+                lastName,
+                email,
+                phone
+            }
+        });
+    } catch (e) {
+        console.error("Error fetching user by ID", e);
+        res.status(500).json({ message: "Internal server error" });
+    }
+};
 
 module.exports = {
     registerUser,

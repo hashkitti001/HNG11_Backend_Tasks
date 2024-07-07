@@ -1,14 +1,16 @@
+const { Op } = require('sequelize');
+const Organisation = require("../models/Organisation");
+const User = require("../models/User");
+
 const getOrganisations = async (req, res) => {
     try {
-        // Assuming user information is available in req.user after authentication
         const userId = req.user.userId;
 
-        // Query organisations where the user is the creator or a member
         const organisations = await Organisation.findAll({
             where: {
                 [Op.or]: [
-                    { createdBy: userId }, // Assuming createdBy is the userId of the creator
-                    { '$members.userId$': userId } // Assuming 'members' is a related table with userId
+                    { createdBy: userId },
+                    { '$members.userId$': userId }
                 ]
             },
             include: [{ model: User, as: 'members', attributes: ['userId', 'firstName', 'lastName', 'email', 'phone'] }]
@@ -35,7 +37,6 @@ const getOrganisationById = async (req, res) => {
     try {
         const { orgId } = req.params;
 
-        // Query organisation by orgId
         const organisation = await Organisation.findOne({
             where: { orgId },
             include: [{ model: User, as: 'members', attributes: ['userId', 'firstName', 'lastName', 'email', 'phone'] }]
@@ -64,7 +65,6 @@ const createOrganisation = async (req, res) => {
     const { name, description } = req.body;
 
     try {
-        // Validate request body
         if (!name) {
             return res.status(400).json({ status: 'Bad Request', message: 'Organisation name is required' });
         }
@@ -93,14 +93,12 @@ const addUserToOrganisation = async (req, res) => {
     const { orgId } = req.params;
 
     try {
-       
         const organisation = await Organisation.findOne({ where: { orgId } });
 
         if (!organisation) {
             return res.status(404).json({ message: 'Organisation not found' });
         }
 
-       
         await organisation.addMember(userId);
 
         res.status(200).json({
@@ -118,4 +116,4 @@ module.exports = {
     createOrganisation,
     getOrganisationById,
     addUserToOrganisation
-}
+};
