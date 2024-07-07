@@ -31,6 +31,6 @@ const User = db.define('User', {
   phone: {
     type: DataTypes.STRING,
   },
-});
+}); //
 
 module.exports = User;
