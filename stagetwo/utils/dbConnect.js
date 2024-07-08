@@ -1,6 +1,8 @@
+require("dotenv").config()
 const { Sequelize } = require('sequelize');
-
-const db = new Sequelize('postgresql://stagetwo_zf3u_user:Orr8G2qJUKcOkwijK0QxJmwFTCqOPpgq@dpg-cq4r0umehbks73bg4ql0-a.oregon-postgres.render.com/stagetwo_zf3u', {
+const process = require("node:process")
+const {PG_PASSWORD ,PG_USER, PG_DATABASE } = process.env
+const db = new Sequelize(`postgresql://${PG_USER}:${PG_PASSWORD}@dpg-cq6515aju9rs73e1a4ig-a.oregon-postgres.render.com/${PG_DATABASE}`, {
   dialect: 'postgres',
   ssl: true,
   dialectOptions: {
