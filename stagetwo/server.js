@@ -13,6 +13,9 @@ app.use(indexRouter)
 app.use(privateRouter)
 
 dbConn()
+app.get("/", (req,res) => {
+    return res.status(200).json({"message": "Alive on port Juice"})
+})
 app.listen(PORT, () => {
     console.info("Stage 2 API running on port", PORT)
 })
