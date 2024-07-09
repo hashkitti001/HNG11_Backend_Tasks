@@ -1,6 +1,7 @@
 const { Op } = require('sequelize');
 const Organisation = require("../models/Organisation");
 const User = require("../models/User");
+const {v4} = require("uuid")
 
 const getOrganisations = async (req, res) => {
     try {
@@ -70,8 +71,8 @@ const createOrganisation = async (req, res) => {
         }
 
         const createdBy = req.user.userId;
-
-        const newOrganisation = await Organisation.create({ name, description, createdBy });
+        const uId = uuid.v4()
+        const newOrganisation = await Organisation.create({ orgId: uId, name, description, createdBy });
 
         res.status(201).json({
             status: 'success',
